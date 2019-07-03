@@ -1,9 +1,9 @@
 # Binaries for programs and plugins
 *.exe
-*.exe~
 *.dll
 *.so
 *.dylib
+build/
 
 # Test binary, build with `go test -c`
 *.test
@@ -11,5 +11,5 @@
 # Output of the go coverage tool, specifically when used with LiteIDE
 *.out
 
-# Goland
-.idea
+# Project-local glide cache, RE: https://github.com/Masterminds/glide/issues/736
+.glide/
