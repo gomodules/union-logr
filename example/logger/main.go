@@ -50,6 +50,6 @@ func main() {
 	logN := natslogr.New().WithName("natslog").WithValues(natslogr.ClusterID, "nats-logr", natslogr.ClientID, "nats-logger", natslogr.NatsURL, stan.DefaultNatsURL, natslogr.ConnectWait, 5, natslogr.Subject, "nats-log-example")
 
 	// union-logr
-	ulog := ulogr.NewUnionLogger(logG, logK, logN).WithName("Union Log")
+	ulog := ulogr.NewUnionLogger(logG, logK, logN).WithName("Union Log").WithValues("WithKey", "WithValue")
 	ulog.V(2).Info("Example", "Name", "Masudur Rahman")
 }
