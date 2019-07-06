@@ -5,10 +5,9 @@ import (
 	"fmt"
 
 	"github.com/go-logr/glogr"
+	ulogr "gomodules.xyz/union-logr"
 	"k8s.io/klog"
 	"k8s.io/klog/klogr"
-
-	ulogr "gomodules.xyz/union-logr"
 )
 
 func Example() {
@@ -19,7 +18,7 @@ func Example() {
 	klog.InitFlags(flag.NewFlagSet("klog", flag.ExitOnError))
 	logK := klogr.New().WithName("klog")
 
-	ulog := ulogr.NewUnionLogger(logG, logK).WithName("ulog").WithValues("logr", "union-logr")
+	ulog := ulogr.NewLogger(logG, logK).WithName("ulog").WithValues("logr", "union-logr")
 	ulog.V(0).Info("Example", "Key", "Value")
 
 	fmt.Println("Example")

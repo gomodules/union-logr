@@ -4,14 +4,12 @@ import (
 	"github.com/go-logr/logr"
 )
 
-type nothing string
-
 type unionLogger []logr.Logger
 type unionInfoLogger []logr.InfoLogger
 
 var _ logr.Logger = unionLogger{}
 
-func NewUnionLogger(loggers ...logr.Logger) logr.Logger {
+func NewLogger(loggers ...logr.Logger) logr.Logger {
 	return unionLogger(loggers)
 }
 
