@@ -1,80 +1,61 @@
 package ulogr
 
-import (
-	"github.com/go-logr/logr"
-)
-
-type unionLogger []logr.Logger
-type unionInfoLogger []logr.InfoLogger
-
-var _ logr.Logger = unionLogger{}
+import "github.com/go-logr/logr"
 
 func NewLogger(loggers ...logr.Logger) logr.Logger {
-	return unionLogger(loggers)
+	out := make([]logr.LogSink, 0, len(loggers))
+	for _, l := range loggers {
+		sink := l.GetSink()
+		if withCallDepth, ok := sink.(logr.CallDepthLogSink); ok {
+			withCallDepth.WithCallDepth(2)
+		}
+		out = append(out, sink)
+	}
+	return logr.New(unionSink(out))
 }
 
-func (l unionLogger) Info(msg string, keysAndValues ...interface{}) {
-	for _, logger := range l {
-		if logger.Enabled() {
-			logger.Info(msg, keysAndValues...)
-		}
+type unionSink []logr.LogSink
+
+var _ logr.LogSink = unionSink{}
+
+func (l unionSink) Init(info logr.RuntimeInfo) {
+	for _, sink := range l {
+		sink.Init(info)
 	}
 }
 
-func (il unionInfoLogger) Info(msg string, keysAndValues ...interface{}) {
-	for _, logger := range il {
-		if logger.Enabled() {
-			logger.Info(msg, keysAndValues...)
-		}
-	}
-}
-
-func (l unionLogger) Enabled() bool {
+func (l unionSink) Enabled(level int) bool {
 	enabled := false
-	for _, logger := range l {
-		enabled = enabled || logger.Enabled()
+	for _, sink := range l {
+		enabled = enabled || sink.Enabled(level)
 	}
-
 	return enabled
 }
 
-func (il unionInfoLogger) Enabled() bool {
-	for _, logger := range il {
-		if logger.Enabled() {
-			return true
-		}
-	}
-
-	return false
-}
-
-func (l unionLogger) Error(err error, msg string, keysAndValues ...interface{}) {
-	for _, logger := range l {
-		logger.Error(err, msg, keysAndValues...)
+func (l unionSink) Error(err error, msg string, keysAndValues ...interface{}) {
+	for _, sink := range l {
+		sink.Error(err, msg, keysAndValues...)
 	}
 }
 
-func (l unionLogger) V(level int) logr.InfoLogger {
-	out := make([]logr.InfoLogger, 0, len(l))
-	for _, logger := range l {
-		out = append(out, logger.V(level))
+func (l unionSink) Info(level int, msg string, keysAndValues ...interface{}) {
+	for _, sink := range l {
+		sink.Info(level, msg, keysAndValues...)
 	}
-
-	return unionInfoLogger(out)
 }
 
-func (l unionLogger) WithName(name string) logr.Logger {
-	out := make([]logr.Logger, 0, len(l))
-	for _, logger := range l {
-		out = append(out, logger.WithName(name))
+func (l unionSink) WithValues(keysAndValues ...interface{}) logr.LogSink {
+	out := make([]logr.LogSink, 0, len(l))
+	for _, sink := range l {
+		out = append(out, sink.WithValues(keysAndValues...))
 	}
-	return unionLogger(out)
+	return unionSink(out)
 }
 
-func (l unionLogger) WithValues(keysAndValues ...interface{}) logr.Logger {
-	out := make([]logr.Logger, 0, len(l))
-	for _, logger := range l {
-		out = append(out, logger.WithValues(keysAndValues...))
+func (l unionSink) WithName(name string) logr.LogSink {
+	out := make([]logr.LogSink, 0, len(l))
+	for _, sink := range l {
+		out = append(out, sink.WithName(name))
 	}
-	return unionLogger(out)
+	return unionSink(out)
 }

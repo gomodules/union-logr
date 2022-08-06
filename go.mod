@@ -1,5 +1,5 @@
 module gomodules.xyz/union-logr
 
-go 1.12
+go 1.18
 
-require github.com/go-logr/logr v0.1.0
+require github.com/go-logr/logr v1.2.3
