@@ -10,7 +10,7 @@ require (
 
 require (
 	github.com/go-logr/logr v1.2.3 // indirect
-	github.com/golang/glog v0.0.0-20160126235308-23def4e6c14b // indirect
+	github.com/golang/glog v1.2.4 // indirect
 )
 
 replace gomodules.xyz/union-logr => ./..
